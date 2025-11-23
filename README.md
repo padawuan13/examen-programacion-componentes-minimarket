@@ -42,7 +42,7 @@ Proyecto principal de React: `examen-componentes`
 Estructura relevante:
 
 - `src/`
-  - `index.js` – Punto de entrada de React. Envuelve la app con `HashRouter`.
+  - `index.js` – Punto de entrada de React. Envuelve la app con `HashRouter` y carga Bootstrap.
   - `App.js` – Shell principal de la aplicación. Define el layout, el navbar y las rutas.
   - `firebase.js` – Configuración de Firebase (Auth, Firestore y Storage).
   - `components/`
@@ -101,6 +101,7 @@ Estructura relevante:
     - Menos de $15.000 → retiro en tienda.
     - Desde $15.000 → envío gratis.
   - Muestra el resumen de envío bajo el total del carrito.
+  - El botón **“Finalizar compra”** lleva a la ruta `/pago`, pasando el total mediante `state` del `Link`.
 
 - Componente hijo: **`ProductItem.jsx`**
   - Recibe `product` y `onAdd` por `props`.
@@ -116,7 +117,7 @@ De esta forma se cumple lo solicitado: componentes de clase, props, state, callb
 **Requisitos del enunciado:**
 
 - Crear un formulario con React.
-- Configurar `react-simple-validator` para validaciones (se utilizó `simple-react-validator`).
+- Configurar `react-simple-validator` (se utilizó `simple-react-validator`) para validaciones.
 - Conectar la aplicación a Firebase.
 - Guardar los datos del formulario en **Firestore Database**.
 
@@ -168,3 +169,146 @@ Así se cumple el uso de formularios controlados, validaciones y persistencia en
 
   ```js
   import 'bootstrap/dist/css/bootstrap.min.css';
+Se utilizaron clases Bootstrap en todos los componentes:
+
+container, row, col-*, card, card-header, card-body, btn, alert, form-control, etc.
+
+Se diseñó un navbar similar a un marketplace (buscador, navegación, estado de sesión) y tarjetas de producto con imágenes y botones.
+
+6.2 Firebase Auth (Auth.jsx)
+Registro de usuarios con email/contraseña (createUserWithEmailAndPassword).
+
+Inicio de sesión (signInWithEmailAndPassword).
+
+Observador de sesión (auth.onAuthStateChanged) que:
+
+Actualiza la UI mostrando “Sesión iniciada como …”.
+
+Permite que el navbar muestre “Bienvenido correo@…”.
+
+Cierre de sesión con auth.signOut().
+
+6.3 Firebase Storage (FileUpload.jsx)
+Selección de archivo desde el equipo.
+
+Subida a Firebase Storage con put(file).
+
+Monitoreo del progreso usando on('state_changed', ...).
+
+Obtención de la URL de descarga con getDownloadURL() y despliegue en pantalla.
+
+6.4 Cordova + Android + APK
+Se creó un proyecto Cordova y se integró el build de React:
+
+Crear proyecto Cordova:
+
+bash
+Copiar código
+cordova create minimarket-android com.felipehernandez.minimarket MinimarketApp
+cd minimarket-android
+cordova platform add android
+Generar build de React:
+
+bash
+Copiar código
+cd ../examen-componentes
+npm run build
+Copiar el contenido de build/ a minimarket-android/www/.
+
+Construir APK de release:
+
+bash
+Copiar código
+cd ../minimarket-android
+cordova build android --release -- --packageType=apk
+El APK sin firmar se genera en:
+
+platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+6.5 Firma del APK y prueba en dispositivo
+Se creó un keystore propio:
+
+bash
+Copiar código
+keytool -genkeypair -v -keystore minimarket-key.jks -alias minimarket -keyalg RSA -keysize 2048 -validity 10000
+Alineación del APK:
+
+bash
+Copiar código
+zipalign -v 4 app-release-unsigned.apk minimarket-release-aligned.apk
+Firma con apksigner:
+
+bash
+Copiar código
+apksigner sign --ks minimarket-key.jks --ks-key-alias minimarket minimarket-release-aligned.apk
+Verificación de la firma:
+
+bash
+Copiar código
+apksigner verify --verbose minimarket-release-aligned.apk
+Instalación en dispositivo Android:
+
+Copia del APK al teléfono.
+
+Activación de instalación de apps desconocidas.
+
+Instalación y prueba de la app en un dispositivo real.
+
+7. Cómo ejecutar el proyecto (web)
+Requisitos previos
+Node.js y npm instalados.
+
+Una cuenta de Firebase configurada con:
+
+Auth (email/contraseña)
+
+Firestore Database
+
+Storage
+
+Pasos
+Clonar o descargar este proyecto.
+
+Instalar dependencias:
+
+bash
+Copiar código
+npm install
+Configurar src/firebase.js con las credenciales del proyecto Firebase:
+
+js
+Copiar código
+const firebaseConfig = {
+  apiKey: "AIzaSyDVK_AsMC92DE9k6W3RQUPNxF8LCt8JlNk",
+  authDomain: "examen-prog-componentes-c0f9c.firebaseapp.com",
+  projectId: "examen-prog-componentes-c0f9c",
+  storageBucket: "examen-prog-componentes-c0f9c.firebasestorage.app",
+  messagingSenderId: "462770591300",
+  appId: "1:462770591300:web:7082b9f344d389ac524e11"
+};
+Ejecutar en modo desarrollo:
+
+bash
+Copiar código
+npm start
+Abrir en el navegador:
+
+arduino
+Copiar código
+http://localhost:3000
+8. Cómo regenerar el APK 
+Generar build de React:
+
+bash
+Copiar código
+cd examen-componentes
+npm run build
+Copiar el contenido de build/ a minimarket-android/www/.
+
+Construir APK de release:
+
+bash
+Copiar código
+cd ../minimarket-android
+cordova build android --release -- --packageType=apk
+Alinear y firmar con zipalign + apksigner usando el keystore minimarket-key.jks.
