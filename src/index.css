@@ -1,13 +1,101 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Reset sencillo */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background-color: #f4f5f7;
+}
+
+/* Contenedor general */
+.app-shell {
+  background-color: #f4f5f7;
+  min-height: 100vh;
+}
+
+/* Navbar estilo marketplace */
+.meli-navbar {
+  background-color: #ffe600; /* amarillo tipo ML */
+}
+
+.meli-navbar .brand {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.meli-navbar .nav-link-like {
+  font-size: 0.85rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.meli-navbar .nav-link-like:hover {
+  text-decoration: underline;
+}
+
+/* Buscador */
+.meli-search-input {
+  border-radius: 999px;
+  border: none;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-shadow: inset 0 0 0 1px #ddd;
+}
+
+/* Tarjetas */
+.card {
+  border-radius: 0.9rem;
+  border: 1px solid #e2e6ea;
+}
+
+.card-header {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Botones más redondeados */
+.btn {
+  border-radius: 999px;
+}
+
+/* Precio destacado */
+.price-tag {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #00a650; /* verde de oferta */
+}
+
+/* Texto pequeñito */
+.text-xs {
+  font-size: 0.8rem;
+}
+
+/* Espaciado entre secciones */
+section + section {
+  margin-top: 2rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Evitar que los títulos se partan en cualquier lado */
+h1, h2, h3, h4, h5, h6,
+.brand,
+.card-header {
+  word-break: keep-all;
+  white-space: normal;
+}
+
+.product-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
 }

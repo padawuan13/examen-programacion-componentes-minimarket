@@ -1,70 +1,170 @@
-# Getting Started with Create React App
+# Examen Programación de Componentes – Aplicación Minimarket
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 1. Descripción general
 
-## Available Scripts
+Este proyecto corresponde al **Examen de la asignatura Programación de Componentes**.  
+Se desarrolló una aplicación React que simula un **minimarket** con:
 
-In the project directory, you can run:
+- Listado de productos y carrito de compras (Ejercicio 1).
+- Formulario de contacto con validaciones y guardado en Firebase/Firestore (Ejercicio 2).
+- Estilos con Bootstrap, autenticación de usuarios (Firebase Auth), subida de archivos (Firebase Storage) y despliegue en Android mediante Cordova/Android Studio y APK firmado (Ejercicio 3).
 
-### `npm start`
+La app está pensada como un prototipo funcional tanto para **web** (React) como para **Android** (APK).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 2. Tecnologías utilizadas
 
-### `npm test`
+- **React** (create-react-app)
+- **React Router DOM** con `HashRouter` para la navegación:
+  - `/` → Productos y carrito
+  - `/contacto` → Formulario de contacto
+  - `/cuenta` → Autenticación y subida de archivos
+  - `/pago` → Pantalla de pago de ejemplo
+- Componentes:
+  - **Componentes de clase** (por ejemplo `ProductList`, `ContactForm`).
+  - **Componentes funcionales** (por ejemplo `ProductItem`, `Auth`, `FileUpload`, `PaymentPage`).
+- **Bootstrap 5** para el diseño responsivo.
+- **simple-react-validator** para validación de formularios.
+- **Firebase**:
+  - Firebase Auth (email/contraseña)
+  - Cloud Firestore (guardar datos del formulario de contacto)
+  - Firebase Storage (subida de archivos con barra de progreso)
+- **Cordova** + **Android SDK** + **Gradle** para generar APK.
+- Firma de APK con **keystore propio** y verificación con `apksigner`.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 3. Estructura del proyecto (web)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Proyecto principal de React: `examen-componentes`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Estructura relevante:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- `src/`
+  - `index.js` – Punto de entrada de React. Envuelve la app con `HashRouter`.
+  - `App.js` – Shell principal de la aplicación. Define el layout, el navbar y las rutas.
+  - `firebase.js` – Configuración de Firebase (Auth, Firestore y Storage).
+  - `components/`
+    - `ProductList.jsx` – Componente padre que:
+      - Contiene el arreglo de productos (`state.products`).
+      - Implementa el carrito de compras (`state.cart` + `setState`).
+      - Usa `map()` para renderizar la lista de productos.
+      - Calcula el **total** y las **condiciones de envío**.
+      - Recibe el término de búsqueda (`searchTerm`) desde `App` por `props`.
+    - `ProductItem.jsx` – Componente hijo que:
+      - Recibe el producto por `props`.
+      - Muestra imagen, nombre, precio y botón “Agregar al carrito”.
+      - Notifica al padre usando un callback (`onAdd(product)`).
+    - `ContactForm.jsx` – Formulario de contacto:
+      - Maneja `nombre`, `email`, `mensaje` en el **state**.
+      - Usa **simple-react-validator** para validar:
+        - Nombre requerido, solo letras y espacios.
+        - Email con formato válido.
+        - Mensaje con un mínimo de caracteres.
+      - Al enviar, guarda los datos en **Firestore** (`db.collection('contactos')`).
+    - `Auth.jsx` – Autenticación de usuarios:
+      - Registro e inicio de sesión mediante **Firebase Auth** (email/contraseña).
+      - Uso de `auth.onAuthStateChanged` para detectar sesión activa.
+      - Muestra al usuario autenticado (“Sesión iniciada como …”).
+      - El navbar muestra **“Bienvenido correo@…”** cuando hay sesión.
+      - Cierra sesión con `auth.signOut()`.
+    - `FileUpload.jsx` – Subida de archivos:
+      - Selecciona un archivo desde el equipo.
+      - Sube el archivo a **Firebase Storage**.
+      - Muestra el **progreso de la subida** en porcentaje.
+      - Obtiene y muestra la **URL de descarga** del archivo.
+    - `PaymentPage.jsx` – Pantalla de pago:
+      - Recibe el `total` del carrito usando `state` en el `Link` de React Router.
+      - Muestra el monto final y un texto informativo de pago (pantalla demo).
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 4. Ejercicio 1 – Lista de productos y carrito
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**Requisitos del enunciado:**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Crear un proyecto React.
+- Diseñar componentes para mostrar una lista de productos (componente padre e hijo).
+- Implementar `map()` para renderizar la lista.
+- Manejar la comunicación padre-hijo e hijo-padre usando `props` y callbacks.
+- Actualizar el carrito con `state` y `this.setState({})`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**Implementación:**
 
-## Learn More
+- Componente padre: **`ProductList.jsx`**
+  - Define `state.products` con varios productos (nombre, precio, imagen).
+  - Define `state.cart` para manejar los ítems del carrito.
+  - Usa `map()` para renderizar cada producto mediante el componente hijo `ProductItem`.
+  - Recibe `searchTerm` desde `App` para filtrar productos.
+  - Calcula el **total** del carrito y muestra condiciones:
+    - Menos de $15.000 → retiro en tienda.
+    - Desde $15.000 → envío gratis.
+  - Muestra el resumen de envío bajo el total del carrito.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Componente hijo: **`ProductItem.jsx`**
+  - Recibe `product` y `onAdd` por `props`.
+  - Muestra imagen, nombre, precio y botón “Agregar al carrito”.
+  - Al hacer clic, llama a `onAdd(product)`, comunicándose con el componente padre.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+De esta forma se cumple lo solicitado: componentes de clase, props, state, callbacks y renderizado con `map()`.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 5. Ejercicio 2 – Formulario con validaciones y Firestore
 
-### Analyzing the Bundle Size
+**Requisitos del enunciado:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Crear un formulario con React.
+- Configurar `react-simple-validator` para validaciones (se utilizó `simple-react-validator`).
+- Conectar la aplicación a Firebase.
+- Guardar los datos del formulario en **Firestore Database**.
 
-### Making a Progressive Web App
+**Implementación (`ContactForm.jsx`):**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Campos:
+  - `nombre`
+  - `email`
+  - `mensaje`
+- Validaciones (simple-react-validator):
+  - `nombre`: `required|alpha_space`
+  - `email`: `required|email`
+  - `mensaje`: `required|min:10`
+- Lógica al enviar:
+  - Si las validaciones pasan, se guarda en Firestore:
 
-### Advanced Configuration
+    ```js
+    db.collection('contactos').add({
+      nombre,
+      email,
+      mensaje,
+      creadoEn: new Date().toISOString()
+    });
+    ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+  - Al guardar correctamente:
+    - Limpia el formulario.
+    - Muestra un mensaje de éxito.
+- Conexión a Firebase:
+  - Definida en `firebase.js`, donde se inicializa el proyecto y se exporta `db`.
 
-### Deployment
+Así se cumple el uso de formularios controlados, validaciones y persistencia en Firestore.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 6. Ejercicio 3 – Bootstrap, Auth, Storage y APK Android
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Requisitos del enunciado:**
+
+1. Estilizar el formulario y componentes con **Bootstrap**.  
+2. Implementar **Firebase Auth** y **Firebase Storage**.  
+3. Configurar **Android Studio, Gradle y Cordova**.  
+4. Exportar el proyecto a **APK**.  
+5. Firmar el APK y probarlo en un dispositivo.
+
+### 6.1 Estilos con Bootstrap
+
+- Se importó Bootstrap globalmente en `index.js`:
+
+  ```js
+  import 'bootstrap/dist/css/bootstrap.min.css';
